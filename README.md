@@ -14,7 +14,3 @@ Here are some ideas to get you started:
 - 😄 Pronouns: ...
 - ⚡ Fun fact: ...
 -->
-
-<div align="center">
-    <div align="center"> <img src="https://visitor-badge.glitch.me/badge?page_id=Fankouzu" /> </div>
-</div>

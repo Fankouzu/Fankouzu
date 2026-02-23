@@ -15,6 +15,7 @@ Here are some ideas to get you started:
 - ⚡ Fun fact: ...
 -->
 ![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=Fankouzu&area=true&hide_border=true&theme=dracula)
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Fankouzu/Fankouzu/output/github-contribution-grid-snake-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Fankouzu/Fankouzu/output/github-contribution-grid-snake.svg">

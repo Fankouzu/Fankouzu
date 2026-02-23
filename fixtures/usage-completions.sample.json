@@ -1,0 +1,53 @@
+{
+  "object": "page",
+  "data": [
+    {
+      "object": "bucket",
+      "start_time": 1730419200,
+      "end_time": 1730505600,
+      "results": [
+        {
+          "object": "organization.usage.completions.result",
+          "model": "gpt-4o",
+          "input_tokens": 250000,
+          "output_tokens": 120000,
+          "input_cached_tokens": 15000,
+          "num_model_requests": 300
+        },
+        {
+          "object": "organization.usage.completions.result",
+          "model": "gpt-4o-mini",
+          "input_tokens": 450000,
+          "output_tokens": 180000,
+          "input_cached_tokens": 25000,
+          "num_model_requests": 500
+        },
+        {
+          "object": "organization.usage.completions.result",
+          "model": "gpt-4-turbo",
+          "input_tokens": 150000,
+          "output_tokens": 60000,
+          "input_cached_tokens": 5000,
+          "num_model_requests": 150
+        },
+        {
+          "object": "organization.usage.completions.result",
+          "model": "gpt-3.5-turbo",
+          "input_tokens": 350000,
+          "output_tokens": 90000,
+          "input_cached_tokens": 0,
+          "num_model_requests": 400
+        },
+        {
+          "object": "organization.usage.completions.result",
+          "model": "o1-preview",
+          "input_tokens": 50000,
+          "output_tokens": 25000,
+          "input_cached_tokens": 2000,
+          "num_model_requests": 80
+        }
+      ]
+    }
+  ],
+  "has_more": false
+}

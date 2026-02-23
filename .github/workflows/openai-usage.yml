@@ -1,0 +1,48 @@
+name: OpenAI Usage
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      last_n_days:
+        description: 'Number of days to fetch usage for'
+        required: false
+        default: '30'
+
+jobs:
+  generate:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch OpenAI Usage
+        run: node scripts/fetch-openai-usage.mjs
+        env:
+          OPENAI_ADMIN_KEY: ${{ secrets.OPENAI_ADMIN_KEY }}
+          LAST_N_DAYS: ${{ github.event.inputs.last_n_days || 30 }}
+
+      - name: Render OpenAI Usage Card (Light)
+        run: node scripts/render-openai-usage-card.mjs light
+
+      - name: Render OpenAI Usage Card (Dark)
+        run: node scripts/render-openai-usage-card.mjs dark
+
+      - name: Push to output branch
+        uses: crazy-max/ghaction-github-pages@v3
+        with:
+          target_branch: output
+          build_dir: dist
+          keep_history: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

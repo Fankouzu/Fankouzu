@@ -54,14 +54,23 @@ const THEMES = {
 
 // 更丰富的模型颜色
 const MODEL_COLORS = {
+  // GPT-4 系列
   "gpt-4o": "#10a37f",
   "gpt-4o-mini": "#14b8a6",
   "gpt-4-turbo": "#8b5cf6",
   "gpt-4": "#a855f7",
+  // GPT-3.5 系列
   "gpt-3.5-turbo": "#f59e0b",
+  // GPT-5 系列
+  "gpt-5": "#06b6d4",
+  "gpt-5.1": "#0ea5e9",
+  "gpt-5.2": "#3b82f6",
+  // O1 系列
   "o1-preview": "#ef4444",
   "o1": "#ec4899",
   "o1-mini": "#f97316",
+  // Codex
+  "codex": "#6366f1",
   Others: "#6b7280",
 };
 
@@ -316,7 +325,27 @@ function normalizeUsagePayload(payload) {
 }
 
 function modelColor(modelName) {
-  return MODEL_COLORS[modelName] ?? MODEL_COLORS.Others;
+  // 1. 精确匹配
+  if (MODEL_COLORS[modelName]) {
+    return MODEL_COLORS[modelName];
+  }
+
+  // 2. 去除日期后缀后匹配（如 gpt-4o-mini-2024-07-18 → gpt-4o-mini）
+  const withoutDate = modelName.replace(/-\d{4}-\d{2}-\d{2}$/, "");
+  if (MODEL_COLORS[withoutDate]) {
+    return MODEL_COLORS[withoutDate];
+  }
+
+  // 3. 前缀匹配（如 gpt-5.2-codex → gpt-5.2）
+  const prefixes = Object.keys(MODEL_COLORS).filter((k) => k !== "Others").sort((a, b) => b.length - a.length);
+  for (const prefix of prefixes) {
+    if (modelName.startsWith(prefix)) {
+      return MODEL_COLORS[prefix];
+    }
+  }
+
+  // 4. 默认颜色
+  return MODEL_COLORS.Others;
 }
 
 function buildChartRows(models) {
@@ -351,7 +380,7 @@ function renderSvgCard(stats, theme) {
   const barX = 138;
   const barWidth = 250;
   const percentX = 470;
-  const rowStartY = 156;
+  const rowStartY = 162;
   const rowGap = 16;
   const barHeight = 12;
 
@@ -445,7 +474,6 @@ function renderSvgCard(stats, theme) {
     <line x1="24" y1="146" x2="476" y2="146" stroke="${colors.border}" stroke-width="1" />
     
     <!-- 模型分布 -->
-    <text x="24" y="160" fill="${colors.text}" font-size="11" font-weight="600">Top Models</text>
     ${rowsMarkup}
   </g>
 </svg>

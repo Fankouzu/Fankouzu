@@ -149,6 +149,18 @@ function escapeXml(value) {
     .replaceAll("'", "&apos;");
 }
 
+// 截断模型名称以避免与条形图重叠
+// 可用宽度: x=38 到 x=138 (约 100px), 在 11px 字体下约 14 个字符
+const MAX_MODEL_NAME_LENGTH = 14;
+
+function truncateModelName(name) {
+  if (name.length <= MAX_MODEL_NAME_LENGTH) {
+    return name;
+  }
+  // 截断并添加省略号
+  return name.slice(0, MAX_MODEL_NAME_LENGTH - 1) + "…";
+}
+
 function resolvePeriodDays(period, buckets) {
   const days = Number.parseInt(String(period?.days ?? ""), 10);
   if (Number.isFinite(days) && days > 0) {
@@ -355,7 +367,7 @@ function renderSvgCard(stats, theme) {
         // 颜色指示圆点
         `<circle cx="${labelX + 4}" cy="${y}" r="4" fill="${row.color}" />`,
         // 模型名称（带颜色）
-        `<text x="${labelX + 14}" y="${y}" fill="${colors.text}" font-size="11" font-weight="500" dominant-baseline="middle">${escapeXml(row.model)}</text>`,
+        `<text x="${labelX + 14}" y="${y}" fill="${colors.text}" font-size="11" font-weight="500" dominant-baseline="middle" title="${escapeXml(row.model)}">${escapeXml(truncateModelName(row.model))}</text>`,
         // 条形图背景轨道
         `<rect x="${barX}" y="${y - barHeight / 2}" width="${barWidth}" height="${barHeight}" rx="6" fill="${colors.barTrack}" />`,
         // 渐变定义

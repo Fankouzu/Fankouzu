@@ -14,28 +14,55 @@ const OUTPUT_PATHS = {
   dark: "dist/openai-usage-dark.svg",
 };
 
+// 丰富的主题配色
 const THEMES = {
   light: {
-    background: "#f6f8fa",
-    text: "#24292f",
-    muted: "#57606a",
-    barTrack: "#eaeef2",
+    background: "#ffffff",
+    backgroundGradientStart: "#f0fdf4",
+    backgroundGradientEnd: "#ecfeff",
+    text: "#1e293b",
+    muted: "#64748b",
+    accent: "#10a37f",
+    accentLight: "#34d399",
+    highlight: "#0ea5e9",
+    barTrack: "#e2e8f0",
+    border: "#e2e8f0",
+    // 统计数字颜色
+    tokenColor: "#10a37f",
+    requestColor: "#8b5cf6",
+    inputColor: "#8b5cf6",
+    outputColor: "#10a37f",
   },
   dark: {
     background: "#0d1117",
+    backgroundGradientStart: "#0f172a",
+    backgroundGradientEnd: "#1e1b4b",
     text: "#f0f6fc",
     muted: "#8b949e",
+    accent: "#22c55e",
+    accentLight: "#4ade80",
+    highlight: "#38bdf8",
     barTrack: "#21262d",
+    border: "#30363d",
+    // 统计数字颜色
+    tokenColor: "#22c55e",
+    requestColor: "#a78bfa",
+    inputColor: "#a78bfa",
+    outputColor: "#22c55e",
   },
 };
 
+// 更丰富的模型颜色
 const MODEL_COLORS = {
   "gpt-4o": "#10a37f",
-  "gpt-4o-mini": "#1a7f64",
-  "gpt-4-turbo": "#ab68ff",
-  "gpt-3.5-turbo": "#74aa9c",
-  "o1-preview": "#ff6b6b",
-  Others: "#6e7681",
+  "gpt-4o-mini": "#14b8a6",
+  "gpt-4-turbo": "#8b5cf6",
+  "gpt-4": "#a855f7",
+  "gpt-3.5-turbo": "#f59e0b",
+  "o1-preview": "#ef4444",
+  "o1": "#ec4899",
+  "o1-mini": "#f97316",
+  Others: "#6b7280",
 };
 
 function parseArgs(argv) {
@@ -314,38 +341,99 @@ function renderSvgCard(stats, theme) {
   const percentX = 470;
   const rowStartY = 156;
   const rowGap = 16;
-  const barHeight = 10;
+  const barHeight = 12;
 
+  // 生成条形图的行，带有颜色指示点和渐变条
   const rowsMarkup = chartRows
     .map((row, index) => {
       const y = rowStartY + index * rowGap;
       const fillWidth = Math.max(0, Math.min(100, row.percentage)) * (barWidth / 100);
-      const safeWidth = fillWidth > 0 && fillWidth < 2 ? 2 : fillWidth;
+      const safeWidth = fillWidth > 0 && fillWidth < 3 ? 3 : fillWidth;
+      const gradientId = `barGradient${index}`;
 
       return [
-        `<text x="${labelX}" y="${y}" fill="${colors.muted}" font-size="11" dominant-baseline="middle">${escapeXml(row.model)}</text>`,
-        `<rect x="${barX}" y="${y - barHeight / 2}" width="${barWidth}" height="${barHeight}" rx="5" fill="${colors.barTrack}" />`,
-        `<rect x="${barX}" y="${y - barHeight / 2}" width="${safeWidth.toFixed(2)}" height="${barHeight}" rx="5" fill="${row.color}" />`,
-        `<text x="${percentX}" y="${y}" fill="${colors.muted}" font-size="11" text-anchor="end" dominant-baseline="middle">${formatPercent(row.percentage)}</text>`,
+        // 颜色指示圆点
+        `<circle cx="${labelX + 4}" cy="${y}" r="4" fill="${row.color}" />`,
+        // 模型名称（带颜色）
+        `<text x="${labelX + 14}" y="${y}" fill="${colors.text}" font-size="11" font-weight="500" dominant-baseline="middle">${escapeXml(row.model)}</text>`,
+        // 条形图背景轨道
+        `<rect x="${barX}" y="${y - barHeight / 2}" width="${barWidth}" height="${barHeight}" rx="6" fill="${colors.barTrack}" />`,
+        // 渐变定义
+        `<defs><linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="0%">`,
+        `<stop offset="0%" style="stop-color:${row.color};stop-opacity:1" />`,
+        `<stop offset="100%" style="stop-color:${row.color};stop-opacity:0.7" />`,
+        `</linearGradient></defs>`,
+        // 条形图填充
+        `<rect x="${barX}" y="${y - barHeight / 2}" width="${safeWidth.toFixed(2)}" height="${barHeight}" rx="6" fill="url(#${gradientId})" />`,
+        // 百分比（带强调色）
+        `<text x="${percentX}" y="${y}" fill="${row.color}" font-size="11" font-weight="600" text-anchor="end" dominant-baseline="middle">${formatPercent(row.percentage)}</text>`,
       ].join("\n");
     })
     .join("\n");
 
+  // 标题渐变 ID
+  const titleGradientId = "titleGradient";
+  const bgGradientId = "bgGradient";
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${SVG_WIDTH}" height="${SVG_HEIGHT}" viewBox="0 0 ${SVG_WIDTH} ${SVG_HEIGHT}" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="0" width="${SVG_WIDTH}" height="${SVG_HEIGHT}" rx="12" fill="${colors.background}" />
+  <defs>
+    <!-- 背景渐变 -->
+    <linearGradient id="${bgGradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:${colors.backgroundGradientStart};stop-opacity:1" />
+      <stop offset="100%" style="stop-color:${colors.backgroundGradientEnd};stop-opacity:1" />
+    </linearGradient>
+    <!-- 标题渐变 -->
+    <linearGradient id="${titleGradientId}" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:${colors.accent};stop-opacity:1" />
+      <stop offset="50%" style="stop-color:${colors.highlight};stop-opacity:1" />
+      <stop offset="100%" style="stop-color:${colors.accentLight};stop-opacity:1" />
+    </linearGradient>
+    <!-- Token 数字渐变 -->
+    <linearGradient id="tokenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:${colors.tokenColor};stop-opacity:1" />
+      <stop offset="100%" style="stop-color:${colors.outputColor};stop-opacity:1" />
+    </linearGradient>
+    <!-- Request 数字渐变 -->
+    <linearGradient id="requestGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:${colors.requestColor};stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect x="0" y="0" width="${SVG_WIDTH}" height="${SVG_HEIGHT}" rx="12" fill="url(#${bgGradientId})" />
+  <!-- 边框 -->
+  <rect x="0.5" y="0.5" width="${SVG_WIDTH - 1}" height="${SVG_HEIGHT - 1}" rx="12" stroke="${colors.border}" stroke-width="1" fill="none" />
+  
   <g font-family="Segoe UI, Helvetica, Arial, sans-serif">
-    <text x="24" y="38" fill="${colors.text}" font-size="20" font-weight="700">OpenAI Usage Stats</text>
-    <text x="24" y="56" fill="${colors.muted}" font-size="12">${escapeXml(subtitle)}</text>
-
-    <text x="24" y="84" fill="${colors.muted}" font-size="11">Total Tokens</text>
-    <text x="24" y="106" fill="${colors.text}" font-size="24" font-weight="700">${formatCompactNumber(totalTokens)}</text>
-    <text x="24" y="123" fill="${colors.muted}" font-size="12">${formatCompactNumber(stats.totalInput)} input, ${formatCompactNumber(stats.totalOutput)} output</text>
-
-    <text x="350" y="84" fill="${colors.muted}" font-size="11">Requests</text>
-    <text x="350" y="106" fill="${colors.text}" font-size="24" font-weight="700">${formatCompactNumber(stats.totalRequests)}</text>
-
-    <text x="24" y="141" fill="${colors.muted}" font-size="11">Top Models</text>
+    <!-- 标题区域 -->
+    <text x="24" y="36" fill="url(#${titleGradientId})" font-size="20" font-weight="700">OpenAI Usage Stats</text>
+    <text x="24" y="54" fill="${colors.muted}" font-size="12">${escapeXml(subtitle)}</text>
+    
+    <!-- 分隔线 -->
+    <line x1="24" y1="66" x2="476" y2="66" stroke="${colors.border}" stroke-width="1" />
+    
+    <!-- 统计数据区域 -->
+    <!-- Total Tokens -->
+    <text x="24" y="86" fill="${colors.muted}" font-size="11" font-weight="500">📊 Total Tokens</text>
+    <text x="24" y="112" fill="url(#tokenGradient)" font-size="28" font-weight="700">${formatCompactNumber(totalTokens)}</text>
+    
+    <!-- Input/Output 分解 -->
+    <circle cx="28" cy="130" r="4" fill="${colors.inputColor}" />
+    <text x="38" y="130" fill="${colors.inputColor}" font-size="11" font-weight="500" dominant-baseline="middle">${formatCompactNumber(stats.totalInput)} input</text>
+    <circle cx="138" cy="130" r="4" fill="${colors.outputColor}" />
+    <text x="148" y="130" fill="${colors.outputColor}" font-size="11" font-weight="500" dominant-baseline="middle">${formatCompactNumber(stats.totalOutput)} output</text>
+    
+    <!-- Requests -->
+    <text x="300" y="86" fill="${colors.muted}" font-size="11" font-weight="500">🔄 Requests</text>
+    <text x="300" y="112" fill="url(#requestGradient)" font-size="28" font-weight="700">${formatCompactNumber(stats.totalRequests)}</text>
+    
+    <!-- 分隔线 -->
+    <line x1="24" y1="146" x2="476" y2="146" stroke="${colors.border}" stroke-width="1" />
+    
+    <!-- 模型分布 -->
+    <text x="24" y="160" fill="${colors.text}" font-size="11" font-weight="600">Top Models</text>
     ${rowsMarkup}
   </g>
 </svg>

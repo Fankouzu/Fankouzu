@@ -170,19 +170,54 @@ async function main() {
   const { outPath, dryRun, empty } = parseArgs(process.argv.slice(2));
   const period = getPeriod(process.env.LAST_N_DAYS);
 
-  let buckets;
+  let buckets = [];
   if (dryRun) {
     buckets = await loadDryRunBuckets(empty);
   } else {
-    const adminKey = process.env.OPENAI_ADMIN_KEY;
-    if (!adminKey) {
-      throw new Error("OPENAI_ADMIN_KEY is required unless --dry-run is set");
+    const rawKeys = process.env.OPENAI_ADMIN_KEY || '';
+    const trimmedKeys = rawKeys.split(',').map(k => k.trim()).filter(Boolean);
+    const keys = [...new Set(trimmedKeys)];
+
+    // 去重日志
+    if (trimmedKeys.length !== keys.length) {
+      console.error(`Info: Removed ${trimmedKeys.length - keys.length} duplicate key(s)`);
     }
-    buckets = await fetchUsagePages({
-      startTime: period.startTime,
-      endTime: period.endTime,
-      adminKey,
-    });
+
+    if (keys.length === 0) {
+      throw new Error('No valid keys found in OPENAI_ADMIN_KEY');
+    }
+
+    console.error(`Info: Processing ${keys.length} key(s)...`);
+
+    const errors = [];
+
+    for (let i = 0; i < keys.length; i++) {
+      try {
+        console.error(`Info: Fetching usage for key ${i + 1}/${keys.length}...`);
+        const keyBuckets = await fetchUsagePages({
+          startTime: period.startTime,
+          endTime: period.endTime,
+          adminKey: keys[i],
+        });
+        buckets.push(...keyBuckets);
+        console.error(`Info: Key ${i + 1}/${keys.length} succeeded (${keyBuckets.length} buckets)`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        errors.push({ index: i + 1, error: message });
+        console.error(`Warning: Key ${i + 1}/${keys.length} failed: ${message}`);
+      }
+    }
+
+    // 汇总结果
+    if (errors.length > 0) {
+      console.error(`Warning: ${errors.length}/${keys.length} key(s) failed`);
+      if (buckets.length === 0) {
+        throw new Error('All keys failed, no data available');
+      }
+      console.error(`Warning: Continuing with data from ${keys.length - errors.length} successful key(s)`);
+    } else {
+      console.error(`Info: All ${keys.length} key(s) succeeded`);
+    }
   }
 
   const aggregated = aggregateUsage(buckets, period);

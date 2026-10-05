@@ -15,6 +15,10 @@ Here are some ideas to get you started:
 - ⚡ Fun fact: ...
 -->
 
+![Github Stats](https://github-readme-stats.vercel.app/api?username=Fankouzu&show_icons=true)
+
+![Top Languages Card](https://github-readme-stats.vercel.app/api/top-langs/?username=Fankouzu&layout=compact)
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Fankouzu/Fankouzu/output/github-contribution-grid-snake-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Fankouzu/Fankouzu/output/github-contribution-grid-snake.svg">
